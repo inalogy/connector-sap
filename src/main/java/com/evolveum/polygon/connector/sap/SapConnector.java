@@ -39,7 +39,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 @ConnectorClass(displayNameKey = "sap.connector.display", configurationClass = SapConfiguration.class)
-public class SapConnector implements PoolableConnector, TestOp, SchemaOp, SearchOp<SapFilter>, CreateOp, DeleteOp, UpdateOp,
+public class SapConnector implements PoolableConnector, TestOp, SchemaOp, SearchOp<SapFilter>, CreateOp, DeleteOp, UpdateDeltaOp,
         SyncOp, ScriptOnConnectorOp {
 
     private static final Log LOG = Log.getLog(SapConnector.class);
@@ -1536,7 +1536,7 @@ public class SapConnector implements PoolableConnector, TestOp, SchemaOp, Search
     }
 
     @Override
-    public Uid update(ObjectClass objectClass, Uid uid, Set<Attribute> attributes, OperationOptions operationOptions) {
+    public Set<AttributeDelta> updateDelta(ObjectClass objectClass, Uid uid, Set<AttributeDelta> set, OperationOptions operationOptions) {
         if (objectClass.is(ObjectClass.ACCOUNT_NAME)) {
             boolean needRollback = false;
             try {
@@ -1544,13 +1544,13 @@ public class SapConnector implements PoolableConnector, TestOp, SchemaOp, Search
                     JCoContext.begin(destination);
                 }
 
-                Uid retUid = updateUser(uid, attributes);
+                Set<AttributeDelta> retSet = updateDeltaUser(uid, set);
 
                 if (configuration.getUseTransaction()) {
                     transactionCommit();
                 }
 
-                return retUid;
+                return retSet;
 
             } catch (ConnectorException ce) {
                 if (configuration.getUseTransaction()) {
@@ -1584,9 +1584,29 @@ public class SapConnector implements PoolableConnector, TestOp, SchemaOp, Search
         }
     }
 
-    private Uid updateUser(Uid uid, Set<Attribute> attributes)
+    private Set<AttributeDelta> updateDeltaUser(Uid uid, Set<AttributeDelta> modifications)
             throws JCoException, ClassNotFoundException, TransformerException {
-        LOG.info("updateUser {0} attributes: {1}", uid, attributes);
+        LOG.info("updateDeltaUser {0} modifications: {1}", uid, modifications);
+
+        if (modifications == null || modifications.isEmpty()) {
+            LOG.ok("request ignored, empty modifications");
+            return new HashSet<>();
+        }
+
+        // Convert AttributeDelta to Attribute
+        Set<Attribute> attributes = new HashSet<>();
+
+        for (AttributeDelta attributeDelta : modifications) {
+            if (attributeDelta.getValuesToReplace() != null) {
+                for (Object value : attributeDelta.getValuesToReplace()) {
+                    attributes.add(AttributeBuilder.build(attributeDelta.getName(), value));
+                }
+            } else if (attributeDelta.getValuesToAdd() != null) {
+                for (Object value : attributeDelta.getValuesToAdd()) {
+                    attributes.add(AttributeBuilder.build(attributeDelta.getName(), value));
+                }
+            }
+        }
 
         JCoFunction function = destination.getRepository().getFunction("BAPI_USER_CHANGE");
         if (function == null)
@@ -1601,34 +1621,20 @@ public class SapConnector implements PoolableConnector, TestOp, SchemaOp, Search
         }
 
         function.getImportParameterList().setValue(USERNAME, userName);
-        // Alternative logon name for the user. This can be used in some logon scenarios instead of the SAP user name.
-//        function.getImportParameterList().getStructure("ALIAS").setValue("USERALIAS",userName);
 
-        // set custom attributes
         boolean updateNeededCustom = setUserCustomAttributes(attributes, function.getImportParameterList(), true);
-
-        // set other attributes
         boolean updateNeededGeneric = setGenericAttributes(attributes, function.getImportParameterList(), true);
-
-        // set table type attributes
         boolean updateNeededTable = setTableTypeAttributes(attributes, function.getTableParameterList(), function.getImportParameterList(), true);
-
-        // handle password & execute update user if needed
         boolean updateNeededPassword = handlePassword(function, attributes, userName, true, updateNeededCustom || updateNeededGeneric || updateNeededTable);
 
         String changedUserName = function.getImportParameterList().getString(USERNAME);
         LOG.info("Changed? {0}, UserName: {1}, importParameterList: {2}, tableParameterList: {3}", (updateNeededCustom || updateNeededGeneric || updateNeededTable || updateNeededPassword), changedUserName, function.getImportParameterList().toXML(), function.getTableParameterList().toXML());
 
-        // assign ACTIVITYGROUPS if needed
         assignActivityGroups(attributes, userName);
-
-        // assign PROFILES if needed
         assignProfiles(attributes, userName);
-
-        // enable/disable/unlock user
         handleActivation(attributes, userName);
 
-        return new Uid(changedUserName);
+        return new HashSet<>();
     }
 
     private void handleActivation(Set<Attribute> attributes, String userName) throws JCoException {

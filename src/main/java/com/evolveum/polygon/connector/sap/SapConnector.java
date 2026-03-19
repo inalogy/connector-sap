@@ -258,7 +258,6 @@ public class SapConnector implements PoolableConnector, TestOp, SchemaOp, Search
 
     @Override
     public void dispose() {
-        this.configuration = null;
         if ((this.destination != null) && (JCoContext.isStateful(this.destination))) {
             if (this.configuration.SNC_MODE_ON.equals(this.configuration.getSncMode())) {
                 deleteDestinationDataFile(this.destination.getDestinationName());
@@ -269,6 +268,8 @@ public class SapConnector implements PoolableConnector, TestOp, SchemaOp, Search
                 throw new ConnectorIOException(jcoe.getMessage(), jcoe);
             }
         }
+        this.destination = null;
+        this.configuration = null;
     }
 
     @Override

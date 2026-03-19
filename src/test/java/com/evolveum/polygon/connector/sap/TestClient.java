@@ -142,6 +142,17 @@ public class TestClient {
         return sapConfiguration;
     }
 
+    private static Set<AttributeDelta> toDelta(Set<Attribute> attributes) {
+        Set<AttributeDelta> deltas = new HashSet<AttributeDelta>();
+        for (Attribute attr : attributes) {
+            AttributeDeltaBuilder builder = new AttributeDeltaBuilder();
+            builder.setName(attr.getName());
+            builder.addValueToReplace(attr.getValue());
+            deltas.add(builder.build());
+        }
+        return deltas;
+    }
+
     @AfterClass
     public static void tearDown() throws Exception {
         if (sapConnector != null) {
@@ -471,7 +482,7 @@ public class TestClient {
 
         // update it
         OperationOptions operationOptions = null;
-        sapConnector.update(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), attributes, operationOptions);
+        sapConnector.updateDelta(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), toDelta(attributes), operationOptions);
 
         // read it
         SapFilter query = new SapFilter();
@@ -531,7 +542,7 @@ public class TestClient {
         attributes.add(AttributeBuilder.build(OperationalAttributes.ENABLE_NAME, false));
 
         OperationOptions operationOptions = null;
-        sapConnector.update(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), attributes, operationOptions);
+        sapConnector.updateDelta(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), toDelta(attributes), operationOptions);
         // checked in testCreateFull
     }
 
@@ -542,7 +553,7 @@ public class TestClient {
         attributes.add(AttributeBuilder.build(OperationalAttributes.ENABLE_NAME, false));
 
         OperationOptions operationOptions = null;
-        sapConnector.update(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), attributes, operationOptions);
+        sapConnector.updateDelta(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), toDelta(attributes), operationOptions);
     }
 
     @Test(dependsOnMethods = {"testCreateFull"})
@@ -552,7 +563,7 @@ public class TestClient {
         attributes.add(AttributeBuilder.build(OperationalAttributes.ENABLE_NAME, true));
 
         OperationOptions operationOptions = null;
-        sapConnector.update(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), attributes, operationOptions);
+        sapConnector.updateDelta(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), toDelta(attributes), operationOptions);
         // checked in testUpdateFull
     }
 
@@ -565,7 +576,7 @@ public class TestClient {
         attributes.add(AttributeBuilder.build(OperationalAttributes.PASSWORD_NAME, password));
 
         OperationOptions operationOptions = null;
-        sapConnector.update(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), attributes, operationOptions);
+        sapConnector.updateDelta(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), toDelta(attributes), operationOptions);
 
         String fileName = "testChangePass.properties";
         SapConfiguration sapConf = null;
@@ -651,7 +662,7 @@ public class TestClient {
 
         // update it
         OperationOptions operationOptions = null;
-        sapConnector.update(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), attributes, operationOptions);
+        sapConnector.updateDelta(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), toDelta(attributes), operationOptions);
 
         // read it
         SapFilter query = new SapFilter();
@@ -701,7 +712,7 @@ public class TestClient {
 
         // update it
         OperationOptions operationOptions = null;
-        sapConnector.update(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), attributes, operationOptions);
+        sapConnector.updateDelta(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), toDelta(attributes), operationOptions);
 
         // read it
         SapFilter query = new SapFilter();
@@ -735,7 +746,7 @@ public class TestClient {
 
         // update it
         OperationOptions operationOptions = null;
-        sapConnector.update(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), attributes, operationOptions);
+        sapConnector.updateDelta(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), toDelta(attributes), operationOptions);
 
         // read it
         SapFilter query = new SapFilter();
@@ -769,7 +780,7 @@ public class TestClient {
 
         // update it
         OperationOptions operationOptions = null;
-        sapConnector.update(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), attributes, operationOptions);
+        sapConnector.updateDelta(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), toDelta(attributes), operationOptions);
 
         // read it
         SapFilter query = new SapFilter();
@@ -841,7 +852,7 @@ public class TestClient {
 
         // update it
         OperationOptions operationOptions = null;
-        sapConnector.update(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), attributes, operationOptions);
+        sapConnector.updateDelta(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), toDelta(attributes), operationOptions);
 
         // read it
         SapFilter query = new SapFilter();
@@ -875,7 +886,7 @@ public class TestClient {
 
         // update it
         OperationOptions operationOptions = null;
-        sapConnector.update(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), attributes, operationOptions);
+        sapConnector.updateDelta(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), toDelta(attributes), operationOptions);
 
         // read it
         SapFilter query = new SapFilter();
@@ -910,7 +921,7 @@ public class TestClient {
 
         // update it
         OperationOptions operationOptions = null;
-        sapConnector.update(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), attributes, operationOptions);
+        sapConnector.updateDelta(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), toDelta(attributes), operationOptions);
 
         // read it
         SapFilter query = new SapFilter();
@@ -986,7 +997,7 @@ public class TestClient {
 
         // update it
         OperationOptions operationOptions = null;
-        sapConnector.update(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), attributes, operationOptions);
+        sapConnector.updateDelta(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), toDelta(attributes), operationOptions);
 
         // read it
         SapFilter query = new SapFilter();
@@ -1020,7 +1031,7 @@ public class TestClient {
 
         // update it
         OperationOptions operationOptions = null;
-        sapConnector.update(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), attributes, operationOptions);
+        sapConnector.updateDelta(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), toDelta(attributes), operationOptions);
 
         // read it
         SapFilter query = new SapFilter();
@@ -1054,7 +1065,7 @@ public class TestClient {
 
         // update it
         OperationOptions operationOptions = null;
-        sapConnector.update(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), attributes, operationOptions);
+        sapConnector.updateDelta(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), toDelta(attributes), operationOptions);
 
         // read it
         SapFilter query = new SapFilter();
@@ -1087,7 +1098,7 @@ public class TestClient {
 
         // update it
         OperationOptions operationOptions = null;
-        sapConnector.update(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), attributes, operationOptions);
+        sapConnector.updateDelta(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), toDelta(attributes), operationOptions);
 
         // read it
         SapFilter query = new SapFilter();
@@ -1122,7 +1133,7 @@ public class TestClient {
 
         // update it
         OperationOptions operationOptions = null;
-        sapConnector.update(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), attributes, operationOptions);
+        sapConnector.updateDelta(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), toDelta(attributes), operationOptions);
 
         // read it
         SapFilter query = new SapFilter();
@@ -1155,7 +1166,7 @@ public class TestClient {
 
         // update it
         OperationOptions operationOptions = null;
-        sapConnector.update(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), attributes, operationOptions);
+        sapConnector.updateDelta(ACCOUNT_OBJECT_CLASS, new Uid(USER_NAME), toDelta(attributes), operationOptions);
 
         // read it
         SapFilter query = new SapFilter();
